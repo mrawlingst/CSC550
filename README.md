@@ -4,7 +4,7 @@ This repository contains all of my assignments and projects completed during Fal
 ## Table of Contents
 * [Template](./Template/README.md/)
 * Assignments
-    * [Assignment 03](./Assignment03/)
+    * [Assignment 03](./Assignment03/README.md)
 * Projects
 * Tests
 
