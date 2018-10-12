@@ -1,0 +1,11 @@
+Instructions:
+
+1) Create a project - "Window Desktop Application"
+2) Delete the following files:
+	- Header Files/Resource.h
+	- Resource Files/Template.rc
+3) Copy the contents of Source Files/Template.cpp into project's main cpp file
+4) Change the following lines:
+	- #include "Template.h" : change Template.h to same name as main cpp file (but with .h!)
+	- const wchar_t* WINDOW_TITLE = TEXT("Template"); : Change template to whatever name you want to display the title
+5) Copy the contents of Header Files/Tempplate.h into project's main header file
