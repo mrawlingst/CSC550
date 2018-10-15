@@ -1,12 +1,10 @@
 #version 420 core
 
-in vec4 position;
-in vec4 color;
+in vec3 position;
 
-uniform mat4 mv_matrix;
-uniform mat4 proj_matrix;
+uniform mat4 projection;
 
 void main(void)
 {
-    gl_Position = position;
+    gl_Position = projection * vec4(position, 1);
 }
