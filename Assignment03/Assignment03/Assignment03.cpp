@@ -140,11 +140,20 @@ bool initOpenGL()
 	glGenBuffers(1, &triangle_ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangle_ebo);
 
-	glBufferData(GL_ARRAY_BUFFER, TRIANGLE_VERTICES.size() * sizeof(GLfloat), &TRIANGLE_VERTICES[0], GL_STATIC_DRAW); // Vertices
+	glBufferData(GL_ARRAY_BUFFER,
+		TRIANGLE_VERTICES.size() * sizeof(GLfloat) + TRIANGLE_COLORS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, TRIANGLE_VERTICES.size() * sizeof(GLfloat), &TRIANGLE_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, TRIANGLE_VERTICES.size() * sizeof(GLfloat), TRIANGLE_COLORS.size() * sizeof(GLfloat), &TRIANGLE_COLORS[0]); // Colors
+
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, TRIANGLE_INDICES.size() * sizeof(GLuint), &TRIANGLE_INDICES[0], GL_STATIC_DRAW); // Indices
 
 	GLuint in_position = glGetAttribLocation(shaderProgram, "position");
 	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	GLuint in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(TRIANGLE_VERTICES.size() * sizeof(GLfloat)));
 #pragma endregion
 
 #pragma region Mesh - Plane 1
@@ -188,22 +197,23 @@ void draw()
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 
 	GLuint in_position;
+	GLuint in_color;
 
 	// Draw triangle
 	glBindVertexArray(triangle_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
 	glDrawElements(GL_TRIANGLES, TRIANGLE_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
 
 	// Draw Plane
-	glBindVertexArray(plane1_vao);
-	//glEnableVertexAttribArray(0);
-	in_position = glGetAttribLocation(shaderProgram, "position");
-	glEnableVertexAttribArray(in_position);
-	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
-	//glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(in_position);
+	//glBindVertexArray(plane1_vao);
+	//in_position = glGetAttribLocation(shaderProgram, "position");
+	//glEnableVertexAttribArray(in_position);
+	//glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	//glDisableVertexAttribArray(in_position);
 
 }
 

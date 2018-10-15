@@ -14,6 +14,13 @@ const std::vector<GLuint> TRIANGLE_INDICES =
 	0, 1, 2
 };
 
+const std::vector<GLfloat> TRIANGLE_COLORS =
+{
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 0.0f
+};
+
 const std::vector<GLfloat> PLANE1_VERTICES =
 {
 	-1.0f, -1.0f,  5.0f, // 0 - bottom left
