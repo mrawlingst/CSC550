@@ -23,14 +23,22 @@ const std::vector<GLfloat> TRIANGLE_COLORS =
 
 const std::vector<GLfloat> PLANE1_VERTICES =
 {
-	-1.0f, -1.0f,  5.0f, // 0 - bottom left
-	-1.0f,  1.0f, -5.0f, // 1 - top left
-	 1.0f, -1.0f,  5.0f, // 2 - bottom right
-	 1.0f,  1.0f, -5.0f  // 3 - top right
+	-100.0f, -1.0f,  50.0f, // 0 - bottom left
+	-100.0f,  1.0f, -50.0f, // 1 - top left
+	 100.0f, -1.0f,  50.0f, // 2 - bottom right
+	 100.0f,  1.0f, -50.0f  // 3 - top right
 };
 
 const std::vector<GLuint> PLANE1_INDICES =
 {
 	0, 1, 2,
 	2, 1, 3
+};
+
+const std::vector<GLfloat> PLANE1_COLORS =
+{
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f
 };

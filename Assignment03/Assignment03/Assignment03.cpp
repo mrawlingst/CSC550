@@ -127,6 +127,9 @@ bool initOpenGL()
 	uniform_projection = glGetUniformLocation(shaderProgram, "projection");
 #pragma endregion
 
+	GLuint in_position;
+	GLuint in_color;
+
 #pragma region Mesh - Triangle
 	// Vertex Array Object
 	glGenVertexArrays(1, &triangle_vao);
@@ -149,10 +152,10 @@ bool initOpenGL()
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, TRIANGLE_INDICES.size() * sizeof(GLuint), &TRIANGLE_INDICES[0], GL_STATIC_DRAW); // Indices
 
-	GLuint in_position = glGetAttribLocation(shaderProgram, "position");
+	in_position = glGetAttribLocation(shaderProgram, "position");
 	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
 
-	GLuint in_color = glGetAttribLocation(shaderProgram, "color");
+	in_color = glGetAttribLocation(shaderProgram, "color");
 	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(TRIANGLE_VERTICES.size() * sizeof(GLfloat)));
 #pragma endregion
 
@@ -169,17 +172,26 @@ bool initOpenGL()
 	glGenBuffers(1, &plane1_ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane1_ebo);
 
-	glBufferData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat), &PLANE1_VERTICES[0], GL_STATIC_DRAW); // Vertices
+	glBufferData(GL_ARRAY_BUFFER,
+		PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, 0, PLANE1_VERTICES.size() * sizeof(GLfloat), &PLANE1_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat), PLANE1_COLORS.size() * sizeof(GLfloat), &PLANE1_COLORS[0]); // Colors
+
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, PLANE1_INDICES.size() * sizeof(GLuint), &PLANE1_INDICES[0], GL_STATIC_DRAW); // Indices
 
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE1_VERTICES.size() * sizeof(GLfloat))); // color
 #pragma endregion
 
 	projection = vmath::perspective(50.0f, 1.0f, 0.0f, 1000.0f);
-	vmath::vec3 trianglePos = vmath::vec3(0.0f, 0.0f, -4.0f);
+	vmath::vec3 trianglePos = vmath::vec3(1.0f, 0.0f, -4.0f);
 	vmath::vec3 camPos = vmath::vec3(0.0f, 0.0f, 0.0f);
-	vmath::mat4 view = vmath::lookat(camPos, trianglePos, vmath::vec3(0.0f, 1.0f, 0.0));
+	vmath::mat4 view = vmath::lookat(camPos, vmath::vec3(0.0f, 0.0f, -1.0f), vmath::vec3(0.0f, 1.0f, 0.0));
 	projection = projection * view * vmath::translate(trianglePos);
 
 	return true;
@@ -207,14 +219,17 @@ void draw()
 	glEnableVertexAttribArray(in_color);
 	glDrawElements(GL_TRIANGLES, TRIANGLE_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
 
-	// Draw Plane
-	//glBindVertexArray(plane1_vao);
-	//in_position = glGetAttribLocation(shaderProgram, "position");
-	//glEnableVertexAttribArray(in_position);
-	//glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
-	//glDisableVertexAttribArray(in_position);
-
+	// Draw Plane 1
+	glBindVertexArray(plane1_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
 }
 
 // Clean up and delete any resources
