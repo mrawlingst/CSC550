@@ -12,6 +12,12 @@
 #pragma comment(lib, "../../glew/lib/86bit/glew32s.lib")
 #endif
 
+//
+enum SHAPES
+{
+	HEXPRISM
+};
+
 // Constants
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -36,7 +42,9 @@ GLuint hexprism_vao, hexprism_vbo, hexprism_ebo;
 GLint uniform_modelView, uniform_projection;
 
 // Animations
-float rotation = 0.0f;;
+SHAPES selectedShape = HEXPRISM;
+float rotationY = 0.0f;
+float rotationX = 0.0f;
 
 // Forward declarations of functions
 char* readFile(const char*);
@@ -439,7 +447,11 @@ void draw()
 	glDisableVertexAttribArray(in_normal);
 
 	// Draw Hexagonal Prism
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS) * vmath::rotate(rotation, 0.0f, 1.0f, 0.0f);
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS);
+	if (selectedShape == HEXPRISM)
+	{
+		projection *= vmath::rotate(rotationX, 1.0f, 0.0f, 0.0f) *vmath::rotate(rotationY, 0.0f, 1.0f, 0.0f);
+	}
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(hexprism_vao);
@@ -538,11 +550,22 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 			switch (message.wParam)
 			{
 			case VK_LEFT:
-				rotation += 0.5f;
+				rotationY -= 0.5f;
 				break;
 
 			case VK_RIGHT:
-				rotation -= 0.5f;
+				rotationY += 0.5f;
+				break;
+
+			case VK_UP:
+				rotationX -= 0.5f;
+				break;
+
+			case VK_DOWN:
+				rotationX += 0.5f;
+				break;
+
+			default:
 				break;
 			}
 
