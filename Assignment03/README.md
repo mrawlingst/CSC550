@@ -5,7 +5,7 @@ Develop a Window-based OpenGL program with the following items drawn on screen:
 * 6 unique hard-coded arrays of meshes
     * 3 with at least 10 unique vertices each
     * 3 with 4 vertices to define plane each
-    * At least 2 meshes are animated (spin, move back and ford, etc.)
+    * At least 2 meshes are animated (spin, move back and forth, etc.)
 
 Provide keyboard controls:
 * Left/Right rotations
