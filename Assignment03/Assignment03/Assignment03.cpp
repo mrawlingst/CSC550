@@ -30,11 +30,11 @@ GLuint triangle_vao, triangle_vbo, triangle_ebo;
 GLuint plane1_vao, plane1_vbo, plane1_ebo;
 
 // Uniforms (GLSL)
-GLint uniform_mv, uniform_projection;
+GLint uniform_modelView, uniform_projection;
 
 // Forward declarations of functions
 char* readFile(const char*);
-void calculateNormals(const GLfloat*, int, const GLint*, int, GLfloat*);
+void calculateNormals(const std::vector<GLfloat>&, int, const std::vector<GLuint>&, int, std::vector<GLfloat>&);
 bool initOpenGL();
 void draw();
 void cleanup();
@@ -64,31 +64,33 @@ char* readFile(const char* fileName)
 }
 
 // Code snippet by Dr. Landon
-void calculateNormals(const std::vector<GLfloat> vertex_position, int num_verts, const std::vector<GLuint> vertex_index, int num_faces, std::vector<GLfloat> normals)
+// Adjusted to use std::vector
+void calculateNormals(const std::vector<GLfloat>& vertex_position, int num_verts, const std::vector<GLuint>& vertex_index, int num_faces, std::vector<GLfloat>& normals)
 {
 	int* tempCount = new int[num_verts];
 
 	for (int i = 0; i < num_verts; i++)
 	{
-		normals[i * 3 + 0] = 0.0f;
-		normals[i * 3 + 1] = 0.0f;
-		normals[i * 3 + 2] = 0.0f;
+		for (int j = 0; j < 3; j++)
+		{
+			normals[i * 3 + j] = 0.0f;
+		}
 		tempCount[i] = 0;
 	}
 
 	for (int face = 0; face < num_faces; face++)
 	{
 		vmath::vec3 A = vmath::vec3(vertex_position[vertex_index[face * 3 + 0] * 3 + 0],
-			vertex_position[vertex_index[face * 3 + 0] * 3 + 3],
-			vertex_position[vertex_index[face * 3 + 0] * 3 + 3]);
+			vertex_position[vertex_index[face * 3 + 0] * 3 + 1],
+			vertex_position[vertex_index[face * 3 + 0] * 3 + 2]);
 
 		vmath::vec3 B = vmath::vec3(vertex_position[vertex_index[face * 3 + 1] * 3 + 0],
-			vertex_position[vertex_index[face * 3 + 1] * 3 + 3],
-			vertex_position[vertex_index[face * 3 + 1] * 3 + 3]);
+			vertex_position[vertex_index[face * 3 + 1] * 3 + 1],
+			vertex_position[vertex_index[face * 3 + 1] * 3 + 2]);
 
-		vmath::vec3 C = vmath::vec3(vertex_position[vertex_index[face * 3 + 1] * 3 + 0],
-			vertex_position[vertex_index[face * 3 + 2] * 3 + 3],
-			vertex_position[vertex_index[face * 3 + 2] * 3 + 3]);
+		vmath::vec3 C = vmath::vec3(vertex_position[vertex_index[face * 3 + 2] * 3 + 0],
+			vertex_position[vertex_index[face * 3 + 2] * 3 + 1],
+			vertex_position[vertex_index[face * 3 + 2] * 3 + 2]);
 
 		vmath::vec3 normal = vmath::normalize(vmath::cross(B - A, C - A));
 
@@ -182,6 +184,7 @@ bool initOpenGL()
 	//uniform_mv = glGetUniformLocation(shaderProgram, "mv_matrix");
 	//uniform_proj = glGetUniformLocation(shaderProgram, "proj_matrix");
 	uniform_projection = glGetUniformLocation(shaderProgram, "projection");
+	uniform_modelView = glGetUniformLocation(shaderProgram, "modelView");
 #pragma endregion
 
 	GLuint in_position;
@@ -218,7 +221,7 @@ bool initOpenGL()
 #pragma endregion
 
 #pragma region Mesh - Plane 1
-	calculateNormals(PLANE1_VERTICES, PLANE1_VERTICES.size() / 3, PLANE1_INDICES, PLANE1_INDICES.size() / 3, PLANE1_NORMALS);
+	//calculateNormals(PLANE1_VERTICES, PLANE1_VERTICES.size() / 3, PLANE1_INDICES, PLANE1_INDICES.size() / 3, PLANE1_NORMALS);
 
 	// Vertex Array Object
 	glGenVertexArrays(1, &plane1_vao);
@@ -284,8 +287,10 @@ void draw()
 	glDisableVertexAttribArray(in_color);
 
 	// Draw Plane 1
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE1_POS);
+	vmath::mat4 modelView = CAMERA_VIEW * vmath::translate(PLANE1_POS);
+	projection = CAMERA_PROJECTION * modelView;
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(plane1_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
