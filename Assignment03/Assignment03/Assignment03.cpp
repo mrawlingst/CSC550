@@ -343,7 +343,7 @@ void draw()
 	GLuint in_normal;
 
 	// Draw triangle
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(TRIANGLE_POS);
+	/*projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(TRIANGLE_POS);
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glBindVertexArray(triangle_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
@@ -352,24 +352,7 @@ void draw()
 	glEnableVertexAttribArray(in_color);
 	glDrawElements(GL_TRIANGLES, TRIANGLE_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
-	glDisableVertexAttribArray(in_color);
-
-	// Draw Plane 1
-	vmath::mat4 modelView = CAMERA_VIEW * vmath::translate(PLANE1_POS);
-	projection = CAMERA_PROJECTION * modelView;
-	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
-	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
-	glBindVertexArray(plane1_vao);
-	in_position = glGetAttribLocation(shaderProgram, "position");
-	glEnableVertexAttribArray(in_position);
-	in_color = glGetAttribLocation(shaderProgram, "color");
-	glEnableVertexAttribArray(in_color);
-	in_normal = glGetAttribLocation(shaderProgram, "normal");
-	glEnableVertexAttribArray(in_normal);
-	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
-	glDisableVertexAttribArray(in_position);
-	glDisableVertexAttribArray(in_color);
-	glDisableVertexAttribArray(in_normal);
+	glDisableVertexAttribArray(in_color);*/
 
 	// Draw Plane 2
 	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE2_POS);
@@ -397,6 +380,23 @@ void draw()
 	in_normal = glGetAttribLocation(shaderProgram, "normal");
 	glEnableVertexAttribArray(in_normal);
 	glDrawElements(GL_TRIANGLES, PLANE3_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
+
+	// Draw Plane 1
+	vmath::mat4 modelView = CAMERA_VIEW * vmath::translate(PLANE1_POS);
+	projection = CAMERA_PROJECTION * modelView;
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
+	glBindVertexArray(plane1_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
+	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
 	glDisableVertexAttribArray(in_normal);
