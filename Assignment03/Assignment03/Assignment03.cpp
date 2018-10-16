@@ -30,6 +30,7 @@ GLuint triangle_vao, triangle_vbo, triangle_ebo;
 GLuint plane1_vao, plane1_vbo, plane1_ebo;
 GLuint plane2_vao, plane2_vbo, plane2_ebo;
 GLuint plane3_vao, plane3_vbo, plane3_ebo;
+GLuint hexprism_vao, hexprism_vbo, hexprism_ebo;
 
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
@@ -323,6 +324,39 @@ bool initOpenGL()
 	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE3_VERTICES.size() * sizeof(GLfloat) + PLANE3_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
+#pragma region Mesh - Hexagonal Prism
+	// Vertex Array Object
+	glGenVertexArrays(1, &hexprism_vao);
+	glBindVertexArray(hexprism_vao);
+
+	// Vertex Buffer Object
+	glGenBuffers(1, &hexprism_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, hexprism_vbo);
+
+	// Element Buffer Object
+	glGenBuffers(1, &hexprism_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, hexprism_ebo);
+
+	glBufferData(GL_ARRAY_BUFFER,
+		HEXPRISM_VERTICES.size() * sizeof(GLfloat) + HEXPRISM_COLORS.size() * sizeof(GLfloat) + HEXPRISM_NORMALS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, HEXPRISM_VERTICES.size() * sizeof(GLfloat), &HEXPRISM_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, HEXPRISM_VERTICES.size() * sizeof(GLfloat), HEXPRISM_COLORS.size() * sizeof(GLfloat), &HEXPRISM_COLORS[0]); // Colors
+	glBufferSubData(GL_ARRAY_BUFFER, HEXPRISM_VERTICES.size() * sizeof(GLfloat) + HEXPRISM_COLORS.size() * sizeof(GLfloat), HEXPRISM_NORMALS.size() * sizeof(GLfloat), &HEXPRISM_NORMALS[0]); // Normals
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, HEXPRISM_INDICES.size() * sizeof(GLuint), &HEXPRISM_INDICES[0], GL_STATIC_DRAW); // Indices
+
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(HEXPRISM_VERTICES.size() * sizeof(GLfloat))); // color
+
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(HEXPRISM_VERTICES.size() * sizeof(GLfloat) + HEXPRISM_COLORS.size() * sizeof(GLfloat)));
+#pragma endregion
+
 	return true;
 }
 
@@ -397,6 +431,22 @@ void draw()
 	in_normal = glGetAttribLocation(shaderProgram, "normal");
 	glEnableVertexAttribArray(in_normal);
 	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
+
+	// Draw Hexagonal Prism
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS);
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
+	glBindVertexArray(hexprism_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
+	glDrawElements(GL_TRIANGLES, HEXPRISM_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
 	glDisableVertexAttribArray(in_normal);
