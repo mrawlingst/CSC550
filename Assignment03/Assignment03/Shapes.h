@@ -73,3 +73,29 @@ const std::vector<GLfloat> PLANE2_COLORS =
 };
 
 std::vector<GLfloat> PLANE2_NORMALS = std::vector<GLfloat>(PLANE2_VERTICES.size());
+
+// Plane #3 - Right
+const vmath::vec3 PLANE3_POS = vmath::vec3(10.0f, 0.0f, 0.0f);
+const std::vector<GLfloat> PLANE3_VERTICES =
+{
+	0.0f, -50.0f, -50.0f, // 0 - bottom left
+	0.0f,  50.0f, -50.0f, // 1 - top left
+	0.0f, -50.0f,  50.0f, // 2 - bottom right
+	0.0f,  50.0f,  50.0f  // 3 - top right
+};
+
+const std::vector<GLuint> PLANE3_INDICES =
+{
+	0, 1, 2,
+	2, 1, 3
+};
+
+const std::vector<GLfloat> PLANE3_COLORS =
+{
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f
+};
+
+std::vector<GLfloat> PLANE3_NORMALS = std::vector<GLfloat>(PLANE3_VERTICES.size());

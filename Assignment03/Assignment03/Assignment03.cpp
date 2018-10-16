@@ -25,10 +25,11 @@ const vmath::mat4 CAMERA_VIEW = vmath::lookat(CAMERA_POS, CAMERA_DIRECTION, vmat
 // Globals
 GLuint shaderProgram;
 
-// Shapes
+// Shapes' buffers
 GLuint triangle_vao, triangle_vbo, triangle_ebo;
 GLuint plane1_vao, plane1_vbo, plane1_ebo;
 GLuint plane2_vao, plane2_vbo, plane2_ebo;
+GLuint plane3_vao, plane3_vbo, plane3_ebo;
 
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
@@ -289,6 +290,39 @@ bool initOpenGL()
 	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE2_VERTICES.size() * sizeof(GLfloat) + PLANE2_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
+#pragma region Mesh - Plane 3
+	// Vertex Array Object
+	glGenVertexArrays(1, &plane3_vao);
+	glBindVertexArray(plane3_vao);
+
+	// Vertex Buffer Object
+	glGenBuffers(1, &plane3_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, plane3_vbo);
+
+	// Element Buffer Object
+	glGenBuffers(1, &plane3_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane3_ebo);
+
+	glBufferData(GL_ARRAY_BUFFER,
+		PLANE3_VERTICES.size() * sizeof(GLfloat) + PLANE3_COLORS.size() * sizeof(GLfloat) + PLANE3_NORMALS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, PLANE3_VERTICES.size() * sizeof(GLfloat), &PLANE3_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE3_VERTICES.size() * sizeof(GLfloat), PLANE3_COLORS.size() * sizeof(GLfloat), &PLANE3_COLORS[0]); // Colors
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE3_VERTICES.size() * sizeof(GLfloat) + PLANE3_COLORS.size() * sizeof(GLfloat), PLANE3_NORMALS.size() * sizeof(GLfloat), &PLANE3_NORMALS[0]); // Normals
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, PLANE3_INDICES.size() * sizeof(GLuint), &PLANE3_INDICES[0], GL_STATIC_DRAW); // Indices
+
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE3_VERTICES.size() * sizeof(GLfloat))); // color
+
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE3_VERTICES.size() * sizeof(GLfloat) + PLANE3_COLORS.size() * sizeof(GLfloat)));
+#pragma endregion
+
 	return true;
 }
 
@@ -351,6 +385,21 @@ void draw()
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
 	glDisableVertexAttribArray(in_normal);
+
+	// Draw Plane 3
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE3_POS);
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glBindVertexArray(plane3_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
+	glDrawElements(GL_TRIANGLES, PLANE3_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
 }
 
 // Clean up and delete any resources
@@ -367,6 +416,10 @@ void cleanup()
 	glDeleteVertexArrays(1, &plane2_vao);
 	glDeleteBuffers(1, &plane2_vbo);
 	glDeleteBuffers(1, &plane2_ebo);
+
+	glDeleteVertexArrays(1, &plane3_vao);
+	glDeleteBuffers(1, &plane3_vbo);
+	glDeleteBuffers(1, &plane3_ebo);
 }
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
