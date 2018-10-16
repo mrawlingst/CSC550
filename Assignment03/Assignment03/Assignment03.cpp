@@ -28,6 +28,7 @@ GLuint shaderProgram;
 // Shapes
 GLuint triangle_vao, triangle_vbo, triangle_ebo;
 GLuint plane1_vao, plane1_vbo, plane1_ebo;
+GLuint plane2_vao, plane2_vbo, plane2_ebo;
 
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
@@ -238,7 +239,7 @@ bool initOpenGL()
 	glBufferData(GL_ARRAY_BUFFER,
 		PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat) + PLANE1_NORMALS.size() * sizeof(GLfloat),
 		NULL,
-		GL_STATIC_DRAW); // Vertices
+		GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, PLANE1_VERTICES.size() * sizeof(GLfloat), &PLANE1_VERTICES[0]); // Vertices
 	glBufferSubData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat), PLANE1_COLORS.size() * sizeof(GLfloat), &PLANE1_COLORS[0]); // Colors
 	glBufferSubData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat), PLANE1_NORMALS.size() * sizeof(GLfloat), &PLANE1_NORMALS[0]); // Normals
@@ -253,6 +254,39 @@ bool initOpenGL()
 
 	in_normal = glGetAttribLocation(shaderProgram, "normal");
 	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat)));
+#pragma endregion
+
+#pragma region Mesh - Plane 2
+	// Vertex Array Object
+	glGenVertexArrays(1, &plane2_vao);
+	glBindVertexArray(plane2_vao);
+
+	// Vertex Buffer Object
+	glGenBuffers(1, &plane2_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, plane2_vbo);
+
+	// Element Buffer Object
+	glGenBuffers(1, &plane2_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane2_ebo);
+
+	glBufferData(GL_ARRAY_BUFFER,
+		PLANE2_VERTICES.size() * sizeof(GLfloat) + PLANE2_COLORS.size() * sizeof(GLfloat) + PLANE2_NORMALS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, PLANE2_VERTICES.size() * sizeof(GLfloat), &PLANE2_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE2_VERTICES.size() * sizeof(GLfloat), PLANE2_COLORS.size() * sizeof(GLfloat), &PLANE2_COLORS[0]); // Colors
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE2_VERTICES.size() * sizeof(GLfloat) + PLANE2_COLORS.size() * sizeof(GLfloat), PLANE2_NORMALS.size() * sizeof(GLfloat), &PLANE2_NORMALS[0]); // Normals
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, PLANE2_INDICES.size() * sizeof(GLuint), &PLANE2_INDICES[0], GL_STATIC_DRAW); // Indices
+
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE2_VERTICES.size() * sizeof(GLfloat))); // color
+
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE2_VERTICES.size() * sizeof(GLfloat) + PLANE2_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
 	return true;
@@ -302,6 +336,21 @@ void draw()
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
 	glDisableVertexAttribArray(in_normal);
+
+	// Draw Plane 2
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE2_POS);
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glBindVertexArray(plane2_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
+	glDrawElements(GL_TRIANGLES, PLANE2_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
 }
 
 // Clean up and delete any resources
@@ -310,6 +359,14 @@ void cleanup()
 	glDeleteVertexArrays(1, &triangle_vao);
 	glDeleteBuffers(1, &triangle_vbo);
 	glDeleteBuffers(1, &triangle_ebo);
+
+	glDeleteVertexArrays(1, &plane1_vao);
+	glDeleteBuffers(1, &plane1_vbo);
+	glDeleteBuffers(1, &plane1_ebo);
+
+	glDeleteVertexArrays(1, &plane2_vao);
+	glDeleteBuffers(1, &plane2_vbo);
+	glDeleteBuffers(1, &plane2_ebo);
 }
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
