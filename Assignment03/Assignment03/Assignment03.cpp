@@ -15,7 +15,8 @@
 //
 enum SHAPES
 {
-	HEXPRISM
+	HEXPRISM,
+	DIAMOND
 };
 
 // Constants
@@ -37,6 +38,7 @@ GLuint plane1_vao, plane1_vbo, plane1_ebo;
 GLuint plane2_vao, plane2_vbo, plane2_ebo;
 GLuint plane3_vao, plane3_vbo, plane3_ebo;
 GLuint hexprism_vao, hexprism_vbo, hexprism_ebo;
+GLuint diamond_vao, diamond_vbo, diamond, diamond_ebo;
 
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
@@ -368,6 +370,39 @@ bool initOpenGL()
 	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(HEXPRISM_VERTICES.size() * sizeof(GLfloat) + HEXPRISM_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
+#pragma region Mesh - Diamond
+	// Vertex Array Object
+	glGenVertexArrays(1, &diamond_vao);
+	glBindVertexArray(diamond_vao);
+
+	// Vertex Buffer Object
+	glGenBuffers(1, &diamond_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, diamond_vbo);
+
+	// Element Buffer Object
+	glGenBuffers(1, &diamond_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diamond_ebo);
+
+	glBufferData(GL_ARRAY_BUFFER,
+		DIAMOND_VERTICES.size() * sizeof(GLfloat) + DIAMOND_COLORS.size() * sizeof(GLfloat) + DIAMOND_NORMALS.size() * sizeof(GLfloat),
+		NULL,
+		GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, DIAMOND_VERTICES.size() * sizeof(GLfloat), &DIAMOND_VERTICES[0]); // Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, DIAMOND_VERTICES.size() * sizeof(GLfloat), DIAMOND_COLORS.size() * sizeof(GLfloat), &DIAMOND_COLORS[0]); // Colors
+	glBufferSubData(GL_ARRAY_BUFFER, DIAMOND_VERTICES.size() * sizeof(GLfloat) + DIAMOND_COLORS.size() * sizeof(GLfloat), DIAMOND_NORMALS.size() * sizeof(GLfloat), &DIAMOND_NORMALS[0]); // Normals
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, DIAMOND_INDICES.size() * sizeof(GLuint), &DIAMOND_INDICES[0], GL_STATIC_DRAW); // Indices
+
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0); // position
+
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(DIAMOND_VERTICES.size() * sizeof(GLfloat))); // color
+
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(DIAMOND_VERTICES.size() * sizeof(GLfloat) + DIAMOND_COLORS.size() * sizeof(GLfloat)));
+#pragma endregion
+
 	return true;
 }
 
@@ -465,6 +500,26 @@ void draw()
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
 	glDisableVertexAttribArray(in_normal);
+
+	// Draw Diamond
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(DIAMOND_POS);
+	if (selectedShape == DIAMOND)
+	{
+		projection *= vmath::rotate(rotationX, 1.0f, 0.0f, 0.0f) *vmath::rotate(rotationY, 0.0f, 1.0f, 0.0f);
+	}
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
+	glBindVertexArray(diamond_vao);
+	in_position = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(in_position);
+	in_color = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
+	glDrawElements(GL_TRIANGLES, DIAMOND_INDICES.size(), GL_UNSIGNED_INT, NULL);
+	glDisableVertexAttribArray(in_position);
+	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
 }
 
 // Clean up and delete any resources
@@ -485,6 +540,14 @@ void cleanup()
 	glDeleteVertexArrays(1, &plane3_vao);
 	glDeleteBuffers(1, &plane3_vbo);
 	glDeleteBuffers(1, &plane3_ebo);
+
+	glDeleteVertexArrays(1, &hexprism_vao);
+	glDeleteBuffers(1, &hexprism_vbo);
+	glDeleteBuffers(1, &hexprism_ebo);
+
+	glDeleteVertexArrays(1, &diamond_vao);
+	glDeleteBuffers(1, &diamond_vbo);
+	glDeleteBuffers(1, &diamond_ebo);
 }
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
@@ -563,6 +626,17 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 			case VK_DOWN:
 				rotationX += 0.5f;
+				break;
+
+			case 0x31:
+				selectedShape = HEXPRISM;
+				break;
+
+			case 0x32:
+				selectedShape = DIAMOND;
+				break;
+
+			case 0x33:
 				break;
 
 			default:

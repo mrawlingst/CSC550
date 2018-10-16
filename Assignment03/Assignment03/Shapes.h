@@ -172,3 +172,58 @@ const std::vector<GLfloat> HEXPRISM_COLORS =
 };
 
 std::vector<GLfloat> HEXPRISM_NORMALS = std::vector<GLfloat>(HEXPRISM_VERTICES.size());
+
+// Diamond
+const vmath::vec3 DIAMOND_POS = vmath::vec3(-0.75f, 0.0f, -2.0f);
+const std::vector<GLfloat> DIAMOND_VERTICES =
+{
+	 0.000f,  0.5f,  0.000f,
+	 0.000f,  0.0f, -0.250f,
+	-0.125f,  0.0f, -0.125f,
+	-0.250f,  0.0f,  0.000f,
+	-0.125f,  0.0f,  0.125f,
+	 0.000f,  0.0f,  0.250f,
+	 0.125f,  0.0f,  0.125f,
+	 0.250f,  0.0f,  0.000f,
+	 0.125f,  0.0f, -0.125f,
+	 0.000f, -0.5f,  0.000f,
+};
+
+const std::vector<GLuint> DIAMOND_INDICES =
+{
+	// Top
+	0, 1, 2,
+	0, 2, 3,
+	0, 3, 4,
+	0, 4, 5,
+	0, 5, 6,
+	0, 6, 7,
+	0, 7, 8,
+	0, 1, 8,
+
+	// Bottom
+	9, 1, 2,
+	9, 2, 3,
+	9, 3, 4,
+	9, 4, 5,
+	9, 5, 6,
+	9, 6, 7,
+	9, 7, 8,
+	9, 1, 8
+};
+
+const std::vector<GLfloat> DIAMOND_COLORS =
+{
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+	0.3f, 0.7f, 0.7f,
+};
+
+std::vector<GLfloat> DIAMOND_NORMALS = std::vector<GLfloat>(DIAMOND_VERTICES.size());
