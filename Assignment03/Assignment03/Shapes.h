@@ -45,3 +45,5 @@ const std::vector<GLfloat> PLANE1_COLORS =
 	1.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f
 };
+
+std::vector<GLfloat> PLANE1_NORMALS;

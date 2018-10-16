@@ -34,6 +34,7 @@ GLint uniform_mv, uniform_projection;
 
 // Forward declarations of functions
 char* readFile(const char*);
+void calculateNormals(const GLfloat*, int, const GLint*, int, GLfloat*);
 bool initOpenGL();
 void draw();
 void cleanup();
@@ -60,6 +61,59 @@ char* readFile(const char* fileName)
 	fclose(file);
 
 	return buffer;
+}
+
+// Code snippet by Dr. Landon
+void calculateNormals(const std::vector<GLfloat> vertex_position, int num_verts, const std::vector<GLuint> vertex_index, int num_faces, std::vector<GLfloat> normals)
+{
+	int* tempCount = new int[num_verts];
+
+	for (int i = 0; i < num_verts; i++)
+	{
+		normals[i * 3 + 0] = 0.0f;
+		normals[i * 3 + 1] = 0.0f;
+		normals[i * 3 + 2] = 0.0f;
+		tempCount[i] = 0;
+	}
+
+	for (int face = 0; face < num_faces; face++)
+	{
+		vmath::vec3 A = vmath::vec3(vertex_position[vertex_index[face * 3 + 0] * 3 + 0],
+			vertex_position[vertex_index[face * 3 + 0] * 3 + 3],
+			vertex_position[vertex_index[face * 3 + 0] * 3 + 3]);
+
+		vmath::vec3 B = vmath::vec3(vertex_position[vertex_index[face * 3 + 1] * 3 + 0],
+			vertex_position[vertex_index[face * 3 + 1] * 3 + 3],
+			vertex_position[vertex_index[face * 3 + 1] * 3 + 3]);
+
+		vmath::vec3 C = vmath::vec3(vertex_position[vertex_index[face * 3 + 1] * 3 + 0],
+			vertex_position[vertex_index[face * 3 + 2] * 3 + 3],
+			vertex_position[vertex_index[face * 3 + 2] * 3 + 3]);
+
+		vmath::vec3 normal = vmath::normalize(vmath::cross(B - A, C - A));
+
+		normals[vertex_index[face * 3 + 0] * 3 + 0] += normal[0];
+		normals[vertex_index[face * 3 + 0] * 3 + 1] += normal[1];
+		normals[vertex_index[face * 3 + 0] * 3 + 2] += normal[2];
+		tempCount[vertex_index[face * 3 + 0]]++;
+
+		normals[vertex_index[face * 3 + 1] * 3 + 0] += normal[0];
+		normals[vertex_index[face * 3 + 1] * 3 + 1] += normal[1];
+		normals[vertex_index[face * 3 + 1] * 3 + 2] += normal[2];
+		tempCount[vertex_index[face * 3 + 1]]++;
+
+		normals[vertex_index[face * 3 + 2] * 3 + 0] += normal[0];
+		normals[vertex_index[face * 3 + 2] * 3 + 1] += normal[1];
+		normals[vertex_index[face * 3 + 2] * 3 + 2] += normal[2];
+		tempCount[vertex_index[face * 3 + 2]]++;
+	}
+
+	for (int i = 0; i < num_verts; i++)
+	{
+		normals[i * 3 + 0] /= (float)tempCount[i];
+		normals[i * 3 + 1] /= (float)tempCount[i];
+		normals[i * 3 + 2] /= (float)tempCount[i];
+	}
 }
 
 bool initOpenGL()
@@ -132,6 +186,7 @@ bool initOpenGL()
 
 	GLuint in_position;
 	GLuint in_color;
+	GLuint in_normal;
 
 #pragma region Mesh - Triangle
 	// Vertex Array Object
@@ -163,6 +218,8 @@ bool initOpenGL()
 #pragma endregion
 
 #pragma region Mesh - Plane 1
+	calculateNormals(PLANE1_VERTICES, PLANE1_VERTICES.size() / 3, PLANE1_INDICES, PLANE1_INDICES.size() / 3, PLANE1_NORMALS);
+
 	// Vertex Array Object
 	glGenVertexArrays(1, &plane1_vao);
 	glBindVertexArray(plane1_vao);
@@ -176,11 +233,12 @@ bool initOpenGL()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane1_ebo);
 
 	glBufferData(GL_ARRAY_BUFFER,
-		PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat),
+		PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat) + PLANE1_NORMALS.size() * sizeof(GLfloat),
 		NULL,
 		GL_STATIC_DRAW); // Vertices
 	glBufferSubData(GL_ARRAY_BUFFER, 0, PLANE1_VERTICES.size() * sizeof(GLfloat), &PLANE1_VERTICES[0]); // Vertices
 	glBufferSubData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat), PLANE1_COLORS.size() * sizeof(GLfloat), &PLANE1_COLORS[0]); // Colors
+	glBufferSubData(GL_ARRAY_BUFFER, PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat), PLANE1_NORMALS.size() * sizeof(GLfloat), &PLANE1_NORMALS[0]); // Normals
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, PLANE1_INDICES.size() * sizeof(GLuint), &PLANE1_INDICES[0], GL_STATIC_DRAW); // Indices
 
@@ -189,6 +247,9 @@ bool initOpenGL()
 
 	in_color = glGetAttribLocation(shaderProgram, "color");
 	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE1_VERTICES.size() * sizeof(GLfloat))); // color
+
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE1_VERTICES.size() * sizeof(GLfloat) + PLANE1_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
 	return true;
@@ -208,6 +269,7 @@ void draw()
 	vmath::mat4 projection;
 	GLuint in_position;
 	GLuint in_color;
+	GLuint in_normal;
 
 	// Draw triangle
 	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(TRIANGLE_POS);
@@ -229,9 +291,12 @@ void draw()
 	glEnableVertexAttribArray(in_position);
 	in_color = glGetAttribLocation(shaderProgram, "color");
 	glEnableVertexAttribArray(in_color);
+	in_normal = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(in_normal);
 	glDrawElements(GL_TRIANGLES, PLANE1_INDICES.size(), GL_UNSIGNED_INT, NULL);
 	glDisableVertexAttribArray(in_position);
 	glDisableVertexAttribArray(in_color);
+	glDisableVertexAttribArray(in_normal);
 }
 
 // Clean up and delete any resources

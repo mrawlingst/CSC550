@@ -3,6 +3,7 @@
 in VS_OUT
 {
 	vec3 color;
+	vec3 normal;
 } fs_in;
 
 out vec4 FragColor;
