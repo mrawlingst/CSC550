@@ -35,6 +35,9 @@ GLuint hexprism_vao, hexprism_vbo, hexprism_ebo;
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
 
+// Animations
+float rotation = 0.0f;;
+
 // Forward declarations of functions
 char* readFile(const char*);
 void calculateNormals(const std::vector<GLfloat>&, int, const std::vector<GLuint>&, int, std::vector<GLfloat>&);
@@ -436,7 +439,7 @@ void draw()
 	glDisableVertexAttribArray(in_normal);
 
 	// Draw Hexagonal Prism
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS);
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS) * vmath::rotate(rotation, 0.0f, 1.0f, 0.0f);
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(hexprism_vao);
@@ -532,6 +535,17 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	{
 		if (PeekMessage(&message, window, 0, 0, PM_REMOVE))
 		{
+			switch (message.wParam)
+			{
+			case VK_LEFT:
+				rotation += 0.5f;
+				break;
+
+			case VK_RIGHT:
+				rotation -= 0.5f;
+				break;
+			}
+
 			// Pressing X button to close
 			if (message.message == WM_QUIT)
 			{
