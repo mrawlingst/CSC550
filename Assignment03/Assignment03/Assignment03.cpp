@@ -16,11 +16,14 @@
 const int WIDTH = 800;
 const int HEIGHT = 600;
 const wchar_t* WINDOW_TITLE = TEXT("Assignment 03");
-GLfloat CLEAR_COLOR[] = {0.0, 0.0, 0.0}; // {R, G, B} - between 0.0 - 1.0
+const GLfloat CLEAR_COLOR[] = {0.0, 0.0, 0.0}; // {R, G, B} - between 0.0 - 1.0
+const vmath::mat4 CAMERA_PROJECTION = vmath::perspective(45.0f, 4.0f / 3.0f, 0.0f, 1000.0f);
+const vmath::vec3 CAMERA_POS = vmath::vec3(0.0f, 0.0f, 0.0f);
+const vmath::vec3 CAMERA_DIRECTION = vmath::vec3(0.0f, 0.0f, -1.0f); // Direction camera is looking at
+const vmath::mat4 CAMERA_VIEW = vmath::lookat(CAMERA_POS, CAMERA_DIRECTION, vmath::vec3(0.0f, 1.0f, 0.0f));
 
 // Globals
 GLuint shaderProgram;
-vmath::mat4 projection;
 
 // Shapes
 GLuint triangle_vao, triangle_vbo, triangle_ebo;
@@ -188,12 +191,6 @@ bool initOpenGL()
 	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(PLANE1_VERTICES.size() * sizeof(GLfloat))); // color
 #pragma endregion
 
-	projection = vmath::perspective(50.0f, 1.0f, 0.0f, 1000.0f);
-	vmath::vec3 trianglePos = vmath::vec3(1.0f, 0.0f, -4.0f);
-	vmath::vec3 camPos = vmath::vec3(0.0f, 0.0f, 0.0f);
-	vmath::mat4 view = vmath::lookat(camPos, vmath::vec3(0.0f, 0.0f, -1.0f), vmath::vec3(0.0f, 1.0f, 0.0));
-	projection = projection * view * vmath::translate(trianglePos);
-
 	return true;
 }
 
@@ -206,12 +203,15 @@ void draw()
 	glUseProgram(shaderProgram);
 
 	// Uniforms
-	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	//glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 
+	vmath::mat4 projection;
 	GLuint in_position;
 	GLuint in_color;
 
 	// Draw triangle
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(TRIANGLE_POS);
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glBindVertexArray(triangle_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
@@ -222,6 +222,8 @@ void draw()
 	glDisableVertexAttribArray(in_color);
 
 	// Draw Plane 1
+	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE1_POS);
+	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glBindVertexArray(plane1_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
