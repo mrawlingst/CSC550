@@ -338,6 +338,8 @@ bool initOpenGL()
 #pragma endregion
 
 #pragma region Mesh - Hexagonal Prism
+	calculateNormals(HEXPRISM_VERTICES, HEXPRISM_VERTICES.size() / 3, HEXPRISM_INDICES, HEXPRISM_INDICES.size() / 3, HEXPRISM_NORMALS);
+
 	// Vertex Array Object
 	glGenVertexArrays(1, &hexprism_vao);
 	glBindVertexArray(hexprism_vao);
@@ -371,6 +373,8 @@ bool initOpenGL()
 #pragma endregion
 
 #pragma region Mesh - Diamond
+	calculateNormals(DIAMOND_VERTICES, DIAMOND_VERTICES.size() / 3, DIAMOND_INDICES, DIAMOND_INDICES.size() / 3, DIAMOND_NORMALS);
+
 	// Vertex Array Object
 	glGenVertexArrays(1, &diamond_vao);
 	glBindVertexArray(diamond_vao);
@@ -403,6 +407,8 @@ bool initOpenGL()
 	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(DIAMOND_VERTICES.size() * sizeof(GLfloat) + DIAMOND_COLORS.size() * sizeof(GLfloat)));
 #pragma endregion
 
+	glEnable(GL_CULL_FACE);
+
 	return true;
 }
 
@@ -418,6 +424,7 @@ void draw()
 	//glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 
 	vmath::mat4 projection;
+	vmath::mat4 modelView;
 	GLuint in_position;
 	GLuint in_color;
 	GLuint in_normal;
@@ -435,8 +442,10 @@ void draw()
 	glDisableVertexAttribArray(in_color);*/
 
 	// Draw Plane 2
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE2_POS);
+	modelView = CAMERA_VIEW * vmath::translate(PLANE2_POS);
+	projection = CAMERA_PROJECTION * modelView;
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(plane2_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
@@ -450,8 +459,10 @@ void draw()
 	glDisableVertexAttribArray(in_normal);
 
 	// Draw Plane 3
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(PLANE3_POS);
+	modelView = CAMERA_VIEW * vmath::translate(PLANE3_POS);
+	projection = CAMERA_PROJECTION * modelView;
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(plane3_vao);
 	in_position = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(in_position);
@@ -465,7 +476,7 @@ void draw()
 	glDisableVertexAttribArray(in_normal);
 
 	// Draw Plane 1
-	vmath::mat4 modelView = CAMERA_VIEW * vmath::translate(PLANE1_POS);
+	modelView = CAMERA_VIEW * vmath::translate(PLANE1_POS);
 	projection = CAMERA_PROJECTION * modelView;
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
@@ -482,11 +493,12 @@ void draw()
 	glDisableVertexAttribArray(in_normal);
 
 	// Draw Hexagonal Prism
-	projection = CAMERA_PROJECTION * CAMERA_VIEW * vmath::translate(HEXPRISM_POS);
+	modelView = CAMERA_VIEW * vmath::translate(HEXPRISM_POS);
 	if (selectedShape == HEXPRISM)
 	{
-		projection *= vmath::rotate(rotationX, 1.0f, 0.0f, 0.0f) *vmath::rotate(rotationY, 0.0f, 1.0f, 0.0f);
+		modelView *= vmath::rotate(rotationX, 1.0f, 0.0f, 0.0f) * vmath::rotate(rotationY, 0.0f, 1.0f, 0.0f);
 	}
+	projection = CAMERA_PROJECTION * modelView;
 	glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
 	glUniformMatrix4fv(uniform_modelView, 1, GL_FALSE, modelView);
 	glBindVertexArray(hexprism_vao);

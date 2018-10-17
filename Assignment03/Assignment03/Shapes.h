@@ -46,7 +46,7 @@ const std::vector<GLfloat> PLANE1_COLORS =
 	1.0f, 0.0f, 0.0f
 };
 
-std::vector<GLfloat> PLANE1_NORMALS = std::vector<GLfloat>(PLANE1_VERTICES.size());
+std::vector<GLfloat> PLANE1_NORMALS = std::vector<GLfloat>(PLANE1_VERTICES.size(), 1.0f);
 
 // Plane #2 - Left
 const vmath::vec3 PLANE2_POS = vmath::vec3(-10.0f, 0.0f, 0.0f);
@@ -72,7 +72,7 @@ const std::vector<GLfloat> PLANE2_COLORS =
 	0.0f, 1.0f, 0.0f
 };
 
-std::vector<GLfloat> PLANE2_NORMALS = std::vector<GLfloat>(PLANE2_VERTICES.size());
+std::vector<GLfloat> PLANE2_NORMALS = std::vector<GLfloat>(PLANE2_VERTICES.size(), 1.0f);
 
 // Plane #3 - Right
 const vmath::vec3 PLANE3_POS = vmath::vec3(10.0f, 0.0f, 0.0f);
@@ -98,7 +98,7 @@ const std::vector<GLfloat> PLANE3_COLORS =
 	0.0f, 0.0f, 1.0f
 };
 
-std::vector<GLfloat> PLANE3_NORMALS = std::vector<GLfloat>(PLANE3_VERTICES.size());
+std::vector<GLfloat> PLANE3_NORMALS = std::vector<GLfloat>(PLANE3_VERTICES.size(), 1.0f);
 
 // Hexagonal Prism
 const vmath::vec3 HEXPRISM_POS = vmath::vec3(0.0f, 0.0f, -2.0f);
