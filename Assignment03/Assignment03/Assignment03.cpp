@@ -29,6 +29,13 @@ const vmath::vec3 CAMERA_POS = vmath::vec3(0.0f, 0.0f, 0.0f);
 const vmath::vec3 CAMERA_DIRECTION = vmath::vec3(0.0f, 0.0f, -1.0f); // Direction camera is looking at
 const vmath::mat4 CAMERA_VIEW = vmath::lookat(CAMERA_POS, CAMERA_DIRECTION, vmath::vec3(0.0f, 1.0f, 0.0f));
 
+const vmath::vec3 LIGHT1_POS   = vmath::vec3( 4.0f, 1.0f,  0.0f);
+const vmath::vec3 LIGHT1_COLOR = vmath::vec3( 1.0f, 0.0f,  0.0f);
+const vmath::vec3 LIGHT2_POS   = vmath::vec3(-1.0f, 5.0f,  5.0f);
+const vmath::vec3 LIGHT2_COLOR = vmath::vec3( 0.0f, 1.0f,  0.0f);
+const vmath::vec3 LIGHT3_POS   = vmath::vec3( 2.0f, 3.0f, -5.0f);
+const vmath::vec3 LIGHT3_COLOR = vmath::vec3( 0.0f, 0.0f,  1.0f);
+
 // Globals
 GLuint shaderProgram;
 
@@ -42,6 +49,9 @@ GLuint diamond_vao, diamond_vbo, diamond, diamond_ebo;
 
 // Uniforms (GLSL)
 GLint uniform_modelView, uniform_projection;
+GLint uniform_lightPos1, uniform_lightColor1;
+GLint uniform_lightPos2, uniform_lightColor2;
+GLint uniform_lightPos3, uniform_lightColor3;
 
 // Animations
 SHAPES selectedShape = HEXPRISM;
@@ -197,10 +207,14 @@ bool initOpenGL()
 	}
 
 	// Get locations of uniforms in shader
-	//uniform_mv = glGetUniformLocation(shaderProgram, "mv_matrix");
-	//uniform_proj = glGetUniformLocation(shaderProgram, "proj_matrix");
 	uniform_projection = glGetUniformLocation(shaderProgram, "projection");
 	uniform_modelView = glGetUniformLocation(shaderProgram, "modelView");
+	uniform_lightPos1 = glGetUniformLocation(shaderProgram, "lightPos1");
+	uniform_lightColor1 = glGetUniformLocation(shaderProgram, "lightColor1");
+	uniform_lightPos2 = glGetUniformLocation(shaderProgram, "lightPos2");
+	uniform_lightColor2 = glGetUniformLocation(shaderProgram, "lightColor2");
+	uniform_lightPos3 = glGetUniformLocation(shaderProgram, "lightPos3");
+	uniform_lightColor3 = glGetUniformLocation(shaderProgram, "lightColor3");
 #pragma endregion
 
 	GLuint in_position;
@@ -422,6 +436,12 @@ void draw()
 
 	// Uniforms
 	//glUniformMatrix4fv(uniform_projection, 1, GL_FALSE, projection);
+	glProgramUniform3fv(shaderProgram, uniform_lightPos1, 1, LIGHT1_POS);
+	glProgramUniform3fv(shaderProgram, uniform_lightColor1, 1, LIGHT1_COLOR);
+	glProgramUniform3fv(shaderProgram, uniform_lightPos2, 1, LIGHT2_POS);
+	glProgramUniform3fv(shaderProgram, uniform_lightColor2, 1, LIGHT2_COLOR);
+	glProgramUniform3fv(shaderProgram, uniform_lightPos3, 1, LIGHT3_POS);
+	glProgramUniform3fv(shaderProgram, uniform_lightColor3, 1, LIGHT3_COLOR);
 
 	vmath::mat4 projection;
 	vmath::mat4 modelView;
