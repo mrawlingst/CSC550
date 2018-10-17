@@ -1,4 +1,8 @@
-// Assignment03.cpp : Defines the entry point for the application.
+// CONTROLS:
+// Left/Right: Y Rotation
+// Up/Down: X Rotation
+// 1: Select Hex Prism mesh (right)
+// 2: Select Diamond mesh (left)
 
 #include "stdafx.h"
 #include "Assignment03.h"
