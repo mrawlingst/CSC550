@@ -5,6 +5,7 @@ This repository contains all of my assignments and projects completed during Fal
 * [Template](./Template/README.md/)
 * Assignments
     * [Assignment 03](./Assignment03/README.md)
+    * [Assignment 04](./Assignment04/)
 * Projects
 * Tests
 
