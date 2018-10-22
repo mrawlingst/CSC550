@@ -2,9 +2,9 @@
 This repository contains all of my assignments and projects completed during Fall 2018.
 
 ## Table of Contents
-* [Template](./Template/README.md/)
+* [Template](./Template/)
 * Assignments
-    * [Assignment 03](./Assignment03/README.md)
+    * [Assignment 03](./Assignment03/)
     * [Assignment 04](./Assignment04/)
 * Projects
 * Tests
