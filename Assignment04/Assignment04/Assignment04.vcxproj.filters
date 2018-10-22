@@ -21,10 +21,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="Assignment04.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Assignment04.h">
+    <ClInclude Include="Shapes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -37,16 +37,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Assignment04.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Assignment04.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
