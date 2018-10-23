@@ -15,12 +15,14 @@
 // Constants
 const int WIDTH = 800;
 const int HEIGHT = 600;
-const wchar_t* WINDOW_TITLE = TEXT("Template");
+const wchar_t* WINDOW_TITLE = TEXT("Assignment 04");
 GLfloat CLEAR_COLOR[] = { 0.0, 0.0, 0.0 }; // {R, G, B} - between 0.0 - 1.0
 
 // Globals
 GLuint shaderProgram;
 GLuint vao, vbo, ebo;
+
+char* gModelToLoad;
 
 // Uniforms (GLSL)
 GLint uniform_mv, uniform_proj;
@@ -63,6 +65,8 @@ bool initOpenGL()
 	{
 		return false;
 	}
+
+	Model* model = new Model("cube.obj");
 
 	// Read shader files
 	char* vs_source = readFile("vertex.vert");
@@ -161,6 +165,8 @@ void cleanup()
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
+	gModelToLoad = lpCmdLine;
+
 	WNDCLASS windowClass;
 
 	ZeroMemory(&windowClass, sizeof(windowClass));

@@ -8,3 +8,4 @@
 #include <gl/GL.h>
 #include <stdio.h>
 #include "Shapes.h"
+#include "Model.h"
