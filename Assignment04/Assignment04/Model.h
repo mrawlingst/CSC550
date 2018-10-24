@@ -6,17 +6,11 @@
 #include "../../include/vmath.h"
 #include <vector>
 
-enum class ModelFileType
-{
-	OBJ,
-	FBX
-};
-
 class Model
 {
 public:
 	Model();
-	Model(const char* fileName, ModelFileType modelType = ModelFileType::OBJ);
+	Model(char* fileName);
 
 	~Model();
 

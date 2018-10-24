@@ -7,17 +7,35 @@ Model::Model()
 {
 }
 
-Model::Model(const char* fileName, ModelFileType modelType)
+Model::Model(char* fileName)
 	: mFileNameToLoad(fileName)
 {
-	switch (modelType)
-	{
-	case ModelFileType::FBX:
-		break;
+	char* extension = strrchr(fileName, '.');
 
-	default:
+	// '.' not found
+	if (extension == NULL)
+	{
+		OutputDebugStringA("Invalid file\n");
+		exit(1);
+	}
+
+	// If .obj is found - loadOBJ()
+	if (strcmp(extension, ".obj") == 0)
+	{
 		loadOBJ();
-		break;
+	}
+	// If .fbx is found - loadFBX()
+	else if (strcmp(extension, ".fbx") == 0)
+	{
+		loadFBX();
+	}
+	// Otherwise, the extension isn't supported
+	else
+	{
+		OutputDebugStringA("Unsupported file type: ");
+		OutputDebugStringA(extension);
+		OutputDebugStringA("\n");
+		exit(1);
 	}
 }
 
@@ -218,4 +236,5 @@ void Model::loadOBJ()
 
 void Model::loadFBX()
 {
+	OutputDebugStringA("FBX Loading not implemented yet.\n");
 }
