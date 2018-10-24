@@ -16,12 +16,16 @@
 const int WIDTH = 800;
 const int HEIGHT = 600;
 const wchar_t* WINDOW_TITLE = TEXT("Assignment 04");
-GLfloat CLEAR_COLOR[] = { 0.0, 0.0, 0.0 }; // {R, G, B} - between 0.0 - 1.0
+const GLfloat CLEAR_COLOR[] = { 0.0, 0.0, 0.0 }; // {R, G, B} - between 0.0 - 1.0
+const vmath::mat4 CAMERA_PROJECTION = vmath::perspective(45.0f, 4.0f / 3.0f, 0.0f, 1000.0f);
+const vmath::vec3 CAMERA_POSITION = vmath::vec3(0.0f, 0.0f, -6.0f);
+const vmath::vec3 CAMERA_TARGET = vmath::vec3(0.0f, 0.0f, 0.0f);
+const vmath::mat4 CAMERA_VIEW = vmath::lookat(CAMERA_POSITION, CAMERA_TARGET, vmath::vec3(0.0f, 1.0f, 0.0f));
 
 // Globals
 GLuint shaderProgram;
-GLuint vao, vbo, ebo;
 
+Model* model;
 char* gModelToLoad;
 
 // Uniforms (GLSL)
@@ -66,8 +70,6 @@ bool initOpenGL()
 		return false;
 	}
 
-	Model* model = new Model("cube.obj");
-
 	// Read shader files
 	char* vs_source = readFile("vertex.vert");
 	char* fs_source = readFile("fragment.frag");
@@ -85,7 +87,7 @@ bool initOpenGL()
 		char error[4096];
 		glGetShaderInfoLog(vertexShader, 4096, NULL, error);
 
-		OutputDebugStringA("Vertex Shader");
+		OutputDebugStringA("Vertex Shader ");
 		OutputDebugStringA(error);
 	}
 
@@ -99,7 +101,7 @@ bool initOpenGL()
 		char error[4096];
 		glGetShaderInfoLog(fragShader, 4096, NULL, error);
 
-		OutputDebugStringA("Fragment Shader");
+		OutputDebugStringA("Fragment Shader ");
 		OutputDebugStringA(error);
 	}
 
@@ -124,23 +126,8 @@ bool initOpenGL()
 	uniform_mv = glGetUniformLocation(shaderProgram, "mv_matrix");
 	uniform_proj = glGetUniformLocation(shaderProgram, "proj_matrix");
 
-	// Vertex Array Object
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	// Vertex Buffer Object
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	// Element Buffer Object
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TRIANGLE_VERTICES), TRIANGLE_VERTICES, GL_STATIC_DRAW); // Vertices
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(TRIANGLE_INDICES), TRIANGLE_INDICES, GL_STATIC_DRAW); // Indices
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	model = new Model(gModelToLoad);
+	model->setShaderProgram(shaderProgram);
 
 	return true;
 }
@@ -152,15 +139,14 @@ void draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(shaderProgram);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+
+	vmath::mat4 world = vmath::mat4::identity();
+	model->draw(world, CAMERA_VIEW, CAMERA_PROJECTION);
 }
 
 // Clean up and delete any resources
 void cleanup()
 {
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ebo);
 }
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)

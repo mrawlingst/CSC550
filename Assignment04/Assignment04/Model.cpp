@@ -25,8 +25,46 @@ Model::~Model()
 {
 }
 
-void Model::draw()
+void Model::draw(vmath::mat4 world, vmath::mat4 view, vmath::mat4 projection)
 {
+	glUseProgram(mShaderProgram);
+	glBindVertexArray(mVAO);
+
+	vmath::mat4 modelView = view * world;
+
+	glUniformMatrix4fv(mUniformProjection, 1, GL_FALSE, projection);
+	glUniformMatrix4fv(mUniformModelView, 1, GL_FALSE, modelView);
+
+	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, NULL);
+}
+
+void Model::setShaderProgram(GLuint program)
+{
+	mShaderProgram = program;
+
+	// in vec3 position;
+	GLuint in_position = glGetAttribLocation(mShaderProgram, "position");
+	glVertexAttribPointer(in_position, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(in_position);
+
+	// in vec3 color;
+	GLuint in_color = glGetAttribLocation(mShaderProgram, "color");
+	glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(GLfloat) * mVertices.size()));
+	glEnableVertexAttribArray(in_color);
+
+	// in vec3 normal;
+	GLuint in_normal = glGetAttribLocation(mShaderProgram, "normal");
+	glVertexAttribPointer(in_normal, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(GLfloat) * (mVertices.size() + mColors.size())));
+	glEnableVertexAttribArray(in_normal);
+
+	// in vec2 texCoord;
+	GLuint in_texCoord = glGetAttribLocation(mShaderProgram, "texCoord");
+	glVertexAttribPointer(in_texCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(sizeof(GLfloat) * (mVertices.size() + mColors.size() + mNormals.size())));
+	glEnableVertexAttribArray(in_texCoord);
+
+	// Uniforms
+	mUniformProjection = glGetUniformLocation(mShaderProgram, "projection");
+	mUniformModelView = glGetUniformLocation(mShaderProgram, "modelView");
 }
 
 void Model::loadOBJ()
@@ -128,7 +166,7 @@ void Model::loadOBJ()
 	} // Done reading OBJ file
 
 	// Resize colors vector to same size as vertices vector
-	mColors.resize(mVertices.size(), 0.0f);
+	mColors.resize(mVertices.size(), 0.5f);
 
 	// Vertex Array Object
 	glGenVertexArrays(1, &mVAO);
@@ -138,34 +176,44 @@ void Model::loadOBJ()
 	glGenBuffers(1, &mVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 
-	// Element Buffer Object
+	// Element Buffer Object - Indices
 	glGenBuffers(1, &mEBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(GLuint), mIndices.data(), GL_STATIC_DRAW);
 
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		sizeof(mVertices) + sizeof(mColors) + sizeof(mNormals) + sizeof(mTexCoords),
+		sizeof(GLfloat) * (mVertices.size() + mColors.size() + mNormals.size() + mTexCoords.size()),
 		NULL,
 		GL_STATIC_DRAW);
 	
 	// Vertices
 	glBufferSubData(GL_ARRAY_BUFFER,
 		0,
-		sizeof(mVertices),
-		&mVertices[0]);
+		sizeof(GLfloat) * mVertices.size(),
+		mVertices.data());
 
 	// Colors
 	glBufferSubData(GL_ARRAY_BUFFER,
-		sizeof(mVertices),
-		sizeof(mColors),
-		&mColors[0]);
+		sizeof(GLfloat) * mVertices.size(),
+		sizeof(GLfloat) * mColors.size(),
+		mColors.data());
 
 	// Normals
 	glBufferSubData(GL_ARRAY_BUFFER,
-		sizeof(mVertices) + sizeof(mColors),
-		sizeof(mNormals),
-		&mNormals[0]);
+		sizeof(GLfloat) * (mVertices.size() + mColors.size()),
+		sizeof(GLfloat) * mNormals.size(),
+		mNormals.data());
 
+	// Tex Coords
+	glBufferSubData(GL_ARRAY_BUFFER,
+		sizeof(GLfloat) * (mVertices.size() + mColors.size() + mNormals.size()),
+		sizeof(GLfloat) * mTexCoords.size(),
+		mTexCoords.data());
+
+	OutputDebugStringA("Loaded model: ");
+	OutputDebugStringA(mFileNameToLoad);
+	OutputDebugStringA("\n");
 }
 
 void Model::loadFBX()

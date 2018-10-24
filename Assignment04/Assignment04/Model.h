@@ -3,6 +3,7 @@
 #pragma warning(disable:4996)
 
 #include "../../include/GL/glew.h"
+#include "../../include/vmath.h"
 #include <vector>
 
 enum class ModelFileType
@@ -19,7 +20,8 @@ public:
 
 	~Model();
 
-	void draw();
+	void draw(vmath::mat4 world, vmath::mat4 view, vmath::mat4 projection);
+	void setShaderProgram(GLuint program);
 
 private:
 	std::vector<GLfloat> mVertices; // Vector of vertices in model
@@ -32,6 +34,8 @@ private:
 
 	// Handle IDs
 	GLuint mVAO, mVBO, mEBO;
+	GLuint mShaderProgram;
+	GLint mUniformProjection, mUniformModelView;
 
 private:
 	void loadOBJ();

@@ -1,8 +1,15 @@
 #version 420 core
 
+in VS_OUT {
+    vec4 position;
+    vec4 color;
+    vec3 normal;
+    vec2 texCoord;
+} fs_in;
+
 out vec4 FragColor;
 
 void main(void)
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = fs_in.color;
 }
