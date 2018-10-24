@@ -28,8 +28,7 @@ GLuint shaderProgram;
 Model* model;
 char* gModelToLoad;
 
-// Uniforms (GLSL)
-GLint uniform_mv, uniform_proj;
+float rotY, rotX;
 
 // Forward declarations of functions
 char* readFile(const char*);
@@ -122,12 +121,26 @@ bool initOpenGL()
 		OutputDebugStringA(error);
 	}
 
-	// Get locations of uniforms in shader
-	uniform_mv = glGetUniformLocation(shaderProgram, "mv_matrix");
-	uniform_proj = glGetUniformLocation(shaderProgram, "proj_matrix");
-
+	// Load model
 	model = new Model(gModelToLoad);
 	model->setShaderProgram(shaderProgram);
+
+	// Load image
+	int w, h, comp;
+	auto image = stbi_load("Jellyfish.jpg", &w, &h, &comp, 0);
+
+	if (image == nullptr)
+		OutputDebugStringA("Failed to load image");
+
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+	stbi_image_free(image);
 
 	return true;
 }
@@ -140,7 +153,7 @@ void draw()
 
 	glUseProgram(shaderProgram);
 
-	vmath::mat4 world = vmath::mat4::identity();
+	vmath::mat4 world = vmath::rotate(rotY, 0.0f, 1.0f, 0.0f) * vmath::rotate(rotX, 1.0f, 0.0f, 0.0f);
 	model->draw(world, CAMERA_VIEW, CAMERA_PROJECTION);
 }
 
@@ -211,6 +224,28 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	{
 		if (PeekMessage(&message, window, 0, 0, PM_REMOVE))
 		{
+			switch (message.wParam)
+			{
+			case VK_LEFT:
+				rotY += 0.5f;
+				break;
+
+			case VK_RIGHT:
+				rotY -= 0.5f;
+				break;
+
+			case VK_UP:
+				rotX += 0.5f;
+				break;
+
+			case VK_DOWN:
+				rotX -= 0.5f;
+				break;
+
+			default:
+				break;
+			}
+
 			// Pressing X button to close
 			if (message.message == WM_QUIT)
 			{

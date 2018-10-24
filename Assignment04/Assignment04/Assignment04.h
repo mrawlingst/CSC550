@@ -6,6 +6,8 @@
 
 #include "../../include/GL/glew.h"
 #include <gl/GL.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "../../include/stb_image.h"
 #include <stdio.h>
 #include "Shapes.h"
 #include "Model.h"
