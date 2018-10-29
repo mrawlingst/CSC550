@@ -35,6 +35,7 @@ bool log_(const char* message, ...)
 	va_start(argptr, message);
 	vfprintf(file, message, argptr);
 	va_end(argptr);
+	fprintf(file, "\n");
 	fclose(file);
 	return true;
 }
@@ -53,6 +54,7 @@ bool err_log_(const char* message, ...)
 	va_start(argptr, message);
 	vfprintf(file, message, argptr);
 	va_end(argptr);
+	fprintf(file, "\n");
 	fclose(file);
 	return true;
 }

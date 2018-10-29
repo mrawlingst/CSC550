@@ -86,8 +86,7 @@ bool initOpenGL()
 		char error[4096];
 		glGetShaderInfoLog(vertexShader, 4096, NULL, error);
 
-		OutputDebugStringA("Vertex Shader ");
-		OutputDebugStringA(error);
+		err_log_("Vertex Shader - %s", error);
 	}
 
 	// Create and compile fragment shader
@@ -100,8 +99,7 @@ bool initOpenGL()
 		char error[4096];
 		glGetShaderInfoLog(fragShader, 4096, NULL, error);
 
-		OutputDebugStringA("Fragment Shader ");
-		OutputDebugStringA(error);
+		err_log_("Fragment Shader - %s", error);
 	}
 
 	// Attach shaders to program
@@ -117,9 +115,10 @@ bool initOpenGL()
 		char error[4096];
 		glGetProgramInfoLog(shaderProgram, 4096, NULL, error);
 
-		OutputDebugStringA("Program Linking");
-		OutputDebugStringA(error);
+		err_log_("Shader Program Linking - %s", error);
 	}
+
+	log_("Shader program linked");
 
 	// Load model
 	model = new Model(gModelToLoad);
@@ -130,7 +129,7 @@ bool initOpenGL()
 	auto image = stbi_load("Jellyfish.jpg", &w, &h, &comp, 0);
 
 	if (image == nullptr)
-		OutputDebugStringA("Failed to load image");
+		err_log_("Failed to load image");
 
 	GLuint textureID;
 	glGenTextures(1, &textureID);

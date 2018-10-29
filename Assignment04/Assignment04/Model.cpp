@@ -16,7 +16,7 @@ Model::Model(char* fileName)
 	// '.' not found
 	if (extension == NULL)
 	{
-		OutputDebugStringA("Invalid file\n");
+		err_log_("Invalid file");
 		exit(1);
 	}
 
@@ -24,20 +24,18 @@ Model::Model(char* fileName)
 	if (strcmp(extension, ".obj") == 0)
 	{
 		//loadOBJ();
-		OutputDebugStringA("OBJ loading disabled\n");
 		err_log_("Tried to load %s - OBJ loading disabled", mFileNameToLoad);
 	}
 	// If .fbx is found - loadFBX()
 	else if (strcmp(extension, ".fbx") == 0)
 	{
+		log_("FBX - Loading %s model", mFileNameToLoad);
 		loadFBX();
 	}
 	// Otherwise, the extension isn't supported
 	else
 	{
-		OutputDebugStringA("Unsupported file type: ");
-		OutputDebugStringA(extension);
-		OutputDebugStringA("\n");
+		err_log_("Unsupported file type: %s", extension);
 		exit(1);
 	}
 }
@@ -100,15 +98,11 @@ void Model::loadOBJ()
 
 	if (file == NULL)
 	{
-		OutputDebugStringA("Could not load model :");
-		OutputDebugStringA(mFileNameToLoad);
-		OutputDebugStringA("\n");
+		err_log_("Could not load model - %s", mFileNameToLoad);
 		return;
 	}
 
-	OutputDebugStringA("Loading model: ");
-	OutputDebugStringA(mFileNameToLoad);
-	OutputDebugStringA("\n");
+	log_("Loading model - %s", mFileNameToLoad);
 
 	// http://www.martinreddy.net/gfx/3d/OBJ.spec
 	// Specs of an OBJ file
@@ -232,12 +226,10 @@ void Model::loadOBJ()
 		sizeof(GLfloat) * mTexCoords.size(),
 		mTexCoords.data());
 
-	OutputDebugStringA("Loaded model: ");
-	OutputDebugStringA(mFileNameToLoad);
-	OutputDebugStringA("\n");
+	log_("Loaded model - %s", mFileNameToLoad);
 }
 
 void Model::loadFBX()
 {
-	OutputDebugStringA("FBX Loading not implemented yet.\n");
+	err_log_("FBX Loading not implemented yet");
 }
