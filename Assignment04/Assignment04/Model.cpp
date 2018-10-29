@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Model.h"
 #include "Helpers.h"
+#include <fbxsdk.h>
 #include <fstream>
 #include <string>
 
@@ -9,7 +10,7 @@ Model::Model()
 }
 
 Model::Model(char* fileName)
-	: mFileNameToLoad(fileName)
+	: mFileNameToLoad(fileName), mHasNormal(false), mHasTexCoords(false)
 {
 	char* extension = strrchr(fileName, '.');
 
@@ -231,5 +232,40 @@ void Model::loadOBJ()
 
 void Model::loadFBX()
 {
-	err_log_("FBX Loading not implemented yet");
+	FbxManager* manager = FbxManager::Create();
+	FbxIOSettings* ioSettings = FbxIOSettings::Create(manager, IOSROOT);
+	FbxImporter* fbxImporter = FbxImporter::Create(manager, "");
+
+	if (!fbxImporter->Initialize(mFileNameToLoad, -1, manager->GetIOSettings()))
+	{
+		err_log_("Could not load FBX model - %s", mFileNameToLoad);
+		return;
+	}
+
+	FbxScene* scene = FbxScene::Create(manager, "myScene");
+	fbxImporter->Import(scene);
+
+	auto rootNode = scene->GetRootNode();
+
+	int count = rootNode->GetChildCount();
+	for (int i = 0; i < count; i++)
+	{
+		auto child = rootNode->GetChild(i);
+		auto mesh = child->GetMesh();
+
+		if (!mesh)
+			continue;
+
+		const int polyCount = mesh->GetPolygonCount();
+
+		mHasNormal = mesh->GetElementNormalCount() > 0;
+		mHasTexCoords = mesh->GetElementUVCount() > 0;
+
+		int polyVertexCount = mesh->GetControlPointsCount();
+		mVertices.resize(polyVertexCount * 4, 0.0f);
+		mIndices.resize(polyCount * 3, 0);
+
+		if (mHasNormal)
+			mNormals.resize(polyVertexCount * 3, 0.0f);
+	}
 }

@@ -24,6 +24,9 @@ private:
 	std::vector<GLfloat> mColors; // Vector of colors in model
 	std::vector<GLfloat> mTexCoords; // Vector of tex coords in model
 
+	bool mHasNormal;
+	bool mHasTexCoords;
+
 	const char* mFileNameToLoad;
 
 	// Handle IDs
