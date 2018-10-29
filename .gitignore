@@ -15,3 +15,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+
+# FBX SDK
+include/fbxsdk.h
+include/fbxsdk/

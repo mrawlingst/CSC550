@@ -14,6 +14,9 @@ Write a complete FBX model loader:
 **HINTS**:
 * Create and pass an instance of a shader program in the model class
 
+## Dependencies
+This assignment depends on FBX SDK 2018.1.1 and for licensing reasons, FBX SDK has not been included in this repository. Please download from [here](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2018-1-1).
+
 ## Credit
 All works are completed by Michael Rawlings and none else unless explicitly stated otherwise.
 
