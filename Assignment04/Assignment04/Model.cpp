@@ -22,7 +22,8 @@ Model::Model(char* fileName)
 	// If .obj is found - loadOBJ()
 	if (strcmp(extension, ".obj") == 0)
 	{
-		loadOBJ();
+		//loadOBJ();
+		OutputDebugStringA("OBJ loading disabled\n");
 	}
 	// If .fbx is found - loadFBX()
 	else if (strcmp(extension, ".fbx") == 0)
