@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Model.h"
+#include "Helpers.h"
 #include <fstream>
 #include <string>
 
@@ -24,6 +25,7 @@ Model::Model(char* fileName)
 	{
 		//loadOBJ();
 		OutputDebugStringA("OBJ loading disabled\n");
+		err_log_("Tried to load %s - OBJ loading disabled", mFileNameToLoad);
 	}
 	// If .fbx is found - loadFBX()
 	else if (strcmp(extension, ".fbx") == 0)
