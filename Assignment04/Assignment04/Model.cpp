@@ -10,7 +10,7 @@ Model::Model()
 }
 
 Model::Model(char* fileName)
-	: mFileNameToLoad(fileName), mHasNormal(false), mHasTexCoords(false)
+	: mFileNameToLoad(fileName), mHasNormal(false), mHasTexCoords(false), mByControlPoint(true)
 {
 	char* extension = strrchr(fileName, '.');
 
@@ -260,12 +260,167 @@ void Model::loadFBX()
 
 		mHasNormal = mesh->GetElementNormalCount() > 0;
 		mHasTexCoords = mesh->GetElementUVCount() > 0;
+		
+		auto normalMapMode = FbxGeometryElement::eNone;
+		auto texCoordMapMode = FbxGeometryElement::eNone;
+
+		if (mHasNormal)
+		{
+			normalMapMode = mesh->GetElementNormal(0)->GetMappingMode();
+			if (normalMapMode == FbxGeometryElement::eNone)
+				mHasNormal = false;
+
+			if (mHasNormal && normalMapMode != FbxGeometryElement::eByControlPoint)
+				mByControlPoint = false;
+		}
+
+		if (mHasTexCoords)
+		{
+			texCoordMapMode = mesh->GetElementUV(0)->GetMappingMode();
+			if (texCoordMapMode == FbxGeometryElement::eNone)
+				mHasTexCoords = false;
+
+			if (mHasTexCoords && texCoordMapMode != FbxGeometryElement::eByControlPoint)
+				mByControlPoint = false;
+		}
 
 		int polyVertexCount = mesh->GetControlPointsCount();
+		if (!mByControlPoint)
+		{
+			polyVertexCount = polyCount * 3;
+		}
 		mVertices.resize(polyVertexCount * 4, 0.0f);
 		mIndices.resize(polyCount * 3, 0);
 
 		if (mHasNormal)
 			mNormals.resize(polyVertexCount * 3, 0.0f);
+
+		FbxStringList uvNames;
+		mesh->GetUVSetNames(uvNames);
+		const char* uvName = NULL;
+		if (mHasTexCoords && uvNames.GetCount())
+		{
+			mTexCoords.resize(polyVertexCount * 2, 0.0f);
+			uvName = uvNames[0];
+		}
+
+		const auto controlPoints = mesh->GetControlPoints();
+		FbxVector4 currentVert;
+		FbxVector4 currentNorm;
+		FbxVector2 currentTexCoord;
+
+		if (mByControlPoint)
+		{
+			const FbxGeometryElementNormal* normalElement = NULL;
+			const FbxGeometryElementUV* uvElement = NULL;
+
+			if (mHasNormal)
+			{
+				normalElement = mesh->GetElementNormal(0);
+			}
+
+			if (mHasTexCoords)
+			{
+				uvElement = mesh->GetElementUV(0);
+			}
+
+			for (int index = 0; index < polyVertexCount; ++index)
+			{
+				currentVert = controlPoints[index];
+				mVertices[index * 4] = static_cast<GLfloat>(currentVert[0]);
+				mVertices[index * 4 + 1] = static_cast<GLfloat>(currentVert[1]);
+				mVertices[index * 4 + 2] = static_cast<GLfloat>(currentVert[2]);
+				mVertices[index * 4 + 3] = 1.0f;
+
+				if (mHasNormal)
+				{
+					int normalIndex = index;
+					if (normalElement->GetReferenceMode() == FbxLayerElement::eIndexToDirect)
+					{
+						normalIndex = normalElement->GetIndexArray().GetAt(index);
+					}
+
+					currentNorm = normalElement->GetDirectArray().GetAt(normalIndex);
+					mNormals[index * 3] = static_cast<GLfloat>(currentNorm[0]);
+					mNormals[index * 3 + 1] = static_cast<GLfloat>(currentNorm[1]);
+					mNormals[index * 3 + 2] = static_cast<GLfloat>(currentNorm[2]);
+				}
+
+				if (mHasTexCoords)
+				{
+					int uvIndex = index;
+					if (uvElement->GetReferenceMode() == FbxLayerElement::eIndexToDirect)
+					{
+						uvIndex = uvElement->GetIndexArray().GetAt(index);
+					}
+
+					currentTexCoord = uvElement->GetDirectArray().GetAt(uvIndex);
+					mNormals[index * 2] = static_cast<GLfloat>(currentTexCoord[0]);
+					mNormals[index * 2 + 1] = static_cast<GLfloat>(currentTexCoord[1]);
+				}
+			}
+		}
+
+		int vertCount = 0;
+		for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
+		{
+			for (int vertIndex = 0; vertIndex < 3; ++vertIndex)
+			{
+				const auto controlPointIndex = mesh->GetPolygonVertex(polyIndex, vertIndex);
+
+				if (mByControlPoint)
+				{
+					mIndices[vertIndex] = static_cast<GLuint>(controlPointIndex);
+				}
+				else
+				{
+					mIndices[vertIndex] = static_cast<GLuint>(vertCount);
+
+					currentVert = controlPoints[controlPointIndex];
+					mVertices[vertCount * 4] = static_cast<GLfloat>(currentVert[0]);
+					mVertices[vertCount * 4 + 1] = static_cast<GLfloat>(currentVert[1]);
+					mVertices[vertCount * 4 + 2] = static_cast<GLfloat>(currentVert[2]);
+					mVertices[vertCount * 4 + 3] = 1.0f;
+
+					if (mHasNormal)
+					{
+						mesh->GetPolygonVertexNormal(polyIndex, vertIndex, currentNorm);
+						mNormals[vertCount * 3] = static_cast<GLfloat>(currentNorm[0]);
+						mNormals[vertCount * 3 + 1] = static_cast<GLfloat>(currentNorm[1]);
+						mNormals[vertCount * 3 + 2] = static_cast<GLfloat>(currentNorm[2]);
+					}
+
+					if (mHasTexCoords)
+					{
+						bool unmap;
+						mesh->GetPolygonVertexUV(polyIndex, vertIndex, uvName, currentTexCoord, unmap);
+						mTexCoords[vertCount * 2] = static_cast<GLfloat>(currentTexCoord[0]);
+						mTexCoords[vertCount * 2 + 1] = static_cast<GLfloat>(currentTexCoord[1]);
+					}
+				}
+
+				++vertCount;
+			}
+		}
+
+		glGenBuffers(VBO_COUNT, mVBONames);
+
+		glBindBuffer(GL_ARRAY_BUFFER, mVBONames[VERTEX_VBO]);
+		glBufferData(GL_ARRAY_BUFFER, polyVertexCount * 4 * sizeof(GLfloat), mVertices.data(), GL_STATIC_DRAW);
+
+		if (mHasNormal)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, mVBONames[NORMAL_VBO]);
+			glBufferData(GL_ARRAY_BUFFER, polyVertexCount * 3 * sizeof(GLfloat), mNormals.data(), GL_STATIC_DRAW);
+		}
+
+		if (mHasTexCoords)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, mVBONames[UV_VBO]);
+			glBufferData(GL_ARRAY_BUFFER, polyVertexCount * 2 * sizeof(GLfloat), mTexCoords.data(), GL_STATIC_DRAW);
+		}
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVBONames[INDEX_VBO]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, polyCount * 3 * sizeof(GLuint), mIndices.data(), GL_STATIC_DRAW);
 	}
 }

@@ -26,6 +26,7 @@ private:
 
 	bool mHasNormal;
 	bool mHasTexCoords;
+	bool mByControlPoint;
 
 	const char* mFileNameToLoad;
 
@@ -33,6 +34,17 @@ private:
 	GLuint mVAO, mVBO, mEBO;
 	GLuint mShaderProgram;
 	GLint mUniformProjection, mUniformModelView;
+
+	enum
+	{
+		VERTEX_VBO,
+		NORMAL_VBO,
+		UV_VBO,
+		INDEX_VBO,
+		VBO_COUNT
+	};
+
+	GLuint mVBONames[VBO_COUNT];
 
 private:
 	void loadOBJ();
